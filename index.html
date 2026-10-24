@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Aion2 Reset Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font-size:15px}
+[hidden]{display:none!important}
+img{max-width:100%}
+/* Layout: one column "reset ledger" — two reset clocks on top, then Daily and Weekly lists of rows with pips/counters. */
+:root{
+  --bg:#f2f3f8; --surface:#ffffff; --sunk:#e9ebf3; --fg:#171a2b; --muted:#5b6078; --line:#dcdfea;
+  --accent:#0d8584; --accent-soft:#d6efee; --gold:#9b6a12; --gold-soft:#f3e7cc; --danger:#b4233b; --ok:#2f7d3a;
+  --f-display:"Marcellus","Palatino Linotype",Georgia,serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d0f1e; --surface:#161931; --sunk:#1d2140; --fg:#e8e9f3; --muted:#9a9eb9; --line:#2a2f50;
+  --accent:#4fd3cb; --accent-soft:#163a42; --gold:#e3b75e; --gold-soft:#3a2f17; --danger:#ff7085; --ok:#6fd47e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d0f1e; --surface:#161931; --sunk:#1d2140; --fg:#e8e9f3; --muted:#9a9eb9; --line:#2a2f50;
+  --accent:#4fd3cb; --accent-soft:#163a42; --gold:#e3b75e; --gold-soft:#3a2f17; --danger:#ff7085; --ok:#6fd47e; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+.wrap{max-width:780px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:400;font-size:2rem;letter-spacing:.02em;margin:0;line-height:1.1;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.sync{font-size:.8rem;color:var(--muted)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:.88rem;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--fg)}
+.btn.danger{color:var(--danger)}
+
+.clocks{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.clocks{grid-template-columns:1fr}}
+.clock{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.clock .lbl{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.clock .t{font-family:var(--f-mono);font-size:1.9rem;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.clock.daily .t{color:var(--accent)}
+.clock.weekly .t{color:var(--gold)}
+.clock .sub{font-size:.84rem;color:var(--muted)}
+.bar{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:3px;transition:width .3s}
+.daily .bar i{background:var(--accent)}
+.weekly .bar i{background:var(--gold)}
+
+.rotation{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--gold-soft);border-radius:var(--r);padding:10px 14px;font-size:.9rem}
+.rotation b{font-weight:600}
+
+section.list{display:flex;flex-direction:column;gap:8px}
+.list-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.list-h h2{font-family:var(--f-display);font-weight:400;font-size:1.35rem;margin:0}
+.list-h span{font-size:.84rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.rows{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row.done .nm{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--muted)}
+.check{width:26px;height:26px;border-radius:7px;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0}
+.check svg{width:15px;height:15px;opacity:0}
+.row.done .check{background:var(--accent);border-color:var(--accent)}
+.row.weekly.done .check{background:var(--gold);border-color:var(--gold)}
+.row.done .check svg{opacity:1}
+.check svg path{stroke:var(--surface)}
+.info{min-width:0}
+.name{font-weight:600}
+.note{font-size:.82rem;color:var(--muted)}
+.counter{display:flex;align-items:center;gap:4px}
+.pip{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);background:transparent;padding:0}
+.pip.f{background:var(--accent);border-color:var(--accent)}
+.weekly .pip.f{background:var(--gold);border-color:var(--gold)}
+.step{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:var(--surface);padding:0;font-weight:600}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;min-width:52px;text-align:center;font-size:.9rem}
+.bell{width:32px;height:32px;border-radius:8px;border:1px solid transparent;background:transparent;display:grid;place-items:center;padding:0;color:var(--muted)}
+.bell:hover{border-color:var(--line)}
+.bell.set{color:var(--accent)}
+.weekly .bell.set{color:var(--gold)}
+.bell svg{width:18px;height:18px}
+.bell .rt{font-size:.66rem;font-family:var(--f-mono)}
+.rem{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--sunk);border-radius:8px;padding:10px 12px;font-size:.88rem}
+.rem input,.rem select,.edit input,.edit select,.set-panel input{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.edit{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.85rem;color:var(--muted)}
+.edit input[type=number]{width:70px}
+.hidden-row{opacity:.45}
+.name{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.req{font-family:var(--f-mono);font-size:.7rem;font-weight:600;padding:1px 6px;border-radius:5px;background:var(--sunk);color:var(--muted);text-decoration:none;white-space:nowrap}
+.ib{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--muted);background:transparent;color:var(--muted);font:italic 700 .72rem/1 Georgia,serif;padding:0;display:inline-grid;place-items:center;flex:none}
+.ib:hover,.ib[aria-expanded="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.weekly .ib:hover,.weekly .ib[aria-expanded="true"]{border-color:var(--gold);color:var(--gold);background:var(--gold-soft)}
+.row.done .name .req,.row.done .name .ib{text-decoration:none}
+.infop{grid-column:1/-1;background:var(--sunk);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;font-size:.88rem;min-width:0}
+.infop p{margin:0}
+.infop .what{font-size:.92rem;max-width:65ch}
+.infop .k{display:block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:600}
+.infop ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px;max-width:65ch}
+.path{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.crumb{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 9px;font-weight:500}
+.key{font-family:var(--f-mono);font-weight:600;background:var(--surface);border:1px solid var(--line);border-bottom-width:3px;border-radius:6px;padding:2px 9px;min-width:28px;text-align:center}
+.sep{color:var(--muted)}
+.reqs{display:grid;grid-template-columns:max-content 1fr;gap:3px 16px;margin:0}
+.reqs dt{color:var(--muted)}
+.reqs dd{margin:0;font-family:var(--f-mono);font-size:.82rem;font-variant-numeric:tabular-nums}
+@media (max-width:440px){.reqs{grid-template-columns:1fr}.reqs dd{margin-bottom:4px}}
+.blk.more{border-left:3px solid var(--accent);padding-left:12px}
+.weekly .blk.more{border-left-color:var(--gold)}
+.links{display:flex;flex-wrap:wrap;gap:12px;font-size:.82rem}
+.links a{color:var(--accent)}
+.weekly .links a{color:var(--gold)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.panel h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:1.15rem}
+.set-panel label{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.set-panel input[type=number]{width:64px}
+.addform{display:flex;gap:8px;flex-wrap:wrap}
+.addform input[type=text]{flex:1 1 180px;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
+.addform select,.addform input[type=number]{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.addform input[type=number]{width:70px}
+.hint{font-size:.82rem;color:var(--muted);margin:0}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.88rem}
+
+.toasts{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:20;max-width:min(360px,calc(100vw - 32px))}
+.toast{background:var(--fg);color:var(--bg);border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:in .25s ease-out}
+.toast b{display:block;font-weight:700}
+.toast button{background:transparent;border:0;color:inherit;opacity:.7;padding:0 2px;font-size:1.1rem}
+@keyframes in{from{transform:translateY(8px);opacity:.3}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.toast{animation:none}.bar i{transition:none}}
+footer{font-size:.8rem;color:var(--muted)}
+footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1><small>Aion2 · Global</small>Reset Tracker</h1>
+    <div class="toolbar">
+      <button class="btn" id="btnEdit" type="button">Edit list</button>
+      <button class="btn" id="btnSettings" type="button">Reminders</button>
+    </div>
+  </header>
+
+  <div class="clocks">
+    <div class="clock daily">
+      <div class="lbl"><span>Daily reset</span><span id="dCount">0/0</span></div>
+      <div class="t" id="dT">--:--:--</div>
+      <div class="bar"><i id="dBar"></i></div>
+      <div class="sub" id="dSub">Every day 07:00 UTC</div>
+    </div>
+    <div class="clock weekly">
+      <div class="lbl"><span>Weekly reset</span><span id="wCount">0/0</span></div>
+      <div class="t" id="wT">-d --:--:--</div>
+      <div class="bar"><i id="wBar"></i></div>
+      <div class="sub" id="wSub">Wednesday 07:00 UTC</div>
+    </div>
+  </div>
+
+  <div class="rotation" id="rotation"></div>
+
+  <div class="panel set-panel" id="settings" hidden>
+    <h3>Reminders</h3>
+    <p class="hint">Reminders pop up while this page is open in a tab (with a chime if sound is on). Set a time per task with the bell icon, or get a warning before each reset.</p>
+    <label><input type="checkbox" id="wDaily"> Warn <input type="number" id="wDailyH" min="1" max="23"> h before daily reset if dailies are unfinished</label>
+    <label><input type="checkbox" id="wWeekly"> Warn <input type="number" id="wWeeklyH" min="1" max="72"> h before weekly reset if weeklies are unfinished</label>
+    <label><input type="checkbox" id="sound"> Play a chime</label>
+    <div class="toolbar">
+      <button class="btn" type="button" id="btnNotif">Try desktop notifications</button>
+      <button class="btn" type="button" id="btnTest">Test reminder</button>
+    </div>
+    <p class="hint" id="notifState"></p>
+  </div>
+
+  <div class="panel" id="editPanel" hidden>
+    <h3>Edit list</h3>
+    <p class="hint">Hide what you don't do, change counts, or add your own tasks. Changes save automatically.</p>
+    <form class="addform" id="addForm">
+      <input type="text" id="addName" placeholder="New task, e.g. Field boss Hamerun" required maxlength="60">
+      <select id="addType"><option value="d">Daily</option><option value="w">Weekly</option></select>
+      <input type="number" id="addMax" min="1" max="50" value="1" title="How many times">
+      <button class="btn" type="submit">Add</button>
+    </form>
+    <div class="confirm" id="resetBox">
+      <button class="btn danger" type="button" id="btnClear">Uncheck everything</button>
+    </div>
+  </div>
+
+  <section class="list" id="listD">
+    <div class="list-h"><h2>Daily</h2><span id="dHead"></span></div>
+    <div class="rows" id="rowsD"></div>
+  </section>
+
+  <section class="list" id="listW">
+    <div class="list-h"><h2>Weekly</h2><span id="wHead"></span></div>
+    <div class="rows" id="rowsW"></div>
+  </section>
+
+  <footer>Resets: daily 07:00 UTC, weekly Wednesday 07:00 UTC (server 16:00). Checks clear themselves at each reset. Info and item levels come from community guides for the Global client; menu names can differ slightly in game. <span id="syncNote"></span></footer>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(() => {
+const DAY = 864e5, WEEK = 7*DAY;
+const SEASON_ANCHOR = Date.UTC(2026,8,30,7); // 30 Sep 2026 07:00 UTC = Season 1 start, Sanctum of Loathing week
+const SEASON_END = Date.UTC(2026,11,16,7);
+
+const BASE = [
+  {id:"duty", t:"d", name:"Duty Missions", max:1, note:"Journal → Duty"},
+  {id:"attend", t:"d", name:"Attendance check-in", max:1, note:"Daily login reward"},
+  {id:"nightmare", t:"d", name:"Nightmare bosses", max:2, note:"+2 attempts a day, banks up to 14"},
+  {id:"odyle", t:"d", name:"Spend Odyle Energy", max:1, note:"Claim reward cubes in Expedition / Transcendence"},
+  {id:"conquest", t:"d", name:"Expedition: Conquest", max:1, note:"Reward charges bank up to 21"},
+  {id:"transc", t:"d", name:"Transcendence", max:2, note:"1 charge every 12 h, banks up to 14"},
+  {id:"shugo", t:"d", name:"Shugo Festival keys", max:3, note:"Event every hour at :00"},
+  {id:"invasion", t:"d", name:"Dimensional Invasion key", max:1, note:"Event every hour at :30"},
+  {id:"ascension", t:"w", name:"Ascension Trial", max:3, note:"Per character, does not carry over"},
+  {id:"fissure", t:"w", name:"Daily Dungeon: Unknown Fissure", max:14, note:"Shared per server · about 2 a day"},
+  {id:"exploration", t:"w", name:"Expedition: Exploration", max:7, note:"7 reward counts per Expedition dungeon"},
+  {id:"raid", t:"w", name:"Sanctuary Raid", max:1, note:"Weekly reward attempts"},
+  {id:"subjugation", t:"w", name:"Subjugation tickets", max:1, note:"Refill to cap on Wednesday"},
+  {id:"abyss", t:"w", name:"Abyss time", max:1, note:"7 h per layer, resets weekly"},
+  {id:"battlefield", t:"w", name:"Battlefield weekly wins", max:1, note:"PvP weekly rewards"},
+  {id:"shops", t:"w", name:"Weekly shops & command scrolls", max:1, note:"Unused purchase limits are lost"},
+  {id:"pass", t:"w", name:"Daeva Pass weekly EXP", max:1, note:"Top up to the weekly limit"},
+  {id:"season", t:"w", name:"Season Mission points", max:1, note:"Paid out at the weekly reset"}
+];
+
+/* Quick info per task: what / where (UI path as chips) / unlock / tips / more (how to get extra) */
+const G = {
+  checklist:["Every reset and cap (metabot.gg)","https://metabot.gg/en/aion-2/guides/daily-weekly-checklist"],
+  duty:["Duty Missions guide (allthings.how)","https://allthings.how/?p=260416"],
+  odyle:["Odyle Energy guide (gamesfuze)","https://gamesfuze.com/guides/aion-2-how-to-get-odyle-energy-and-where-to-spend-it/"],
+  asc:["Ascension Trial guide (gamesfuze)","https://gamesfuze.com/guides/aion-2-ascension-trial-guide/"],
+  shugo:["Shugo Festival guide (mobalytics)","https://mobalytics.gg/gamebase/guides/aion-2-shugo-festival"],
+  inv:["Event schedule & timers (allthings.how)","https://allthings.how/?p=265177"],
+  dung:["Dungeon types (thegameswiki)","https://thegameswiki.com/aion-2/wiki/dungeons"],
+  season:["Season 1 & Nightmare bosses (wikily.gg)","https://wikily.gg/aion-2/season-1"],
+  reset:["Weekly reset shopping (allthings.how)","https://allthings.how/?p=247726"]
+};
+const INFO = {
+  duty:{what:"Bounty-style missions. You pick up to 5 per day for the whole account, not per character. Slot 1 is a guaranteed reward, slots 2–5 are chance-based.",
+    where:["J","Duty tab","Missions"],
+    unlock:"Level 45, your faction's Episode quest (Draupnir for Elyos, Forgotten Commander for Asmodians), then your first visit to the Abyss.",
+    tips:["Priority rewards: Soul Crystals, Odyle Energy, Nightmare / Ascension Trial tickets, then Kina.","You can reroll missions for Kina, up to 10 times a day, to fish for better rewards."], links:[G.duty]},
+  attend:{what:"Daily login rewards. They refresh at the daily reset, so claim them every day you play.",
+    where:["Pops up on login"], tips:["Attendance and event rewards sometimes include Odyle Energy items."], links:[G.inv]},
+  nightmare:{what:"A solo boss ladder. Season 1 has 7 bosses in Dream Layer I, each with several tiers. An attempt is only used up when you clear the boss.",
+    where:["Main menu","Content","Nightmare"],
+    tips:["+2 attempts a day, banking up to 14, so you lose nothing by skipping a day (just don't leave it full for a week).","A clear also gives the rewards of all lower tiers you skipped.","Rewards: Phantasmal Fragments, spent in the Nightmare shop."],
+    more:["Nightmare Dungeon Challenge Ticket gives +1 attempt (a Duty Mission reward)."], links:[G.season,G.checklist]},
+  odyle:{what:"A PvE energy you spend to open the Reward Cube at the end of Expedition, Transcendence and Sanctuary runs. A normal cube costs about 40. Some Hard dungeons also cost 40–60 to enter.",
+    where:["Shown after a clear","Reward Cube"],
+    tips:["It regenerates on its own but stops at the cap, so a full bar is wasted regen.","You can skip a cube to save energy for a better dungeon. You only have 10 skipped cubes per week, though. After that Expedition and Transcendence are locked until Wednesday."],
+    more:["Duty Missions: Small Odyle Energy (+10) and Hidden Cube keys. Reroll missions to target them.","Hidden cubes on the field maps.","Daeva Pass rewards.","Attendance, events and limited-time rewards.","Substance Morph crafting (limited crafts per character and per server).","Shops that stock Odyle Energy items, some with weekly limits.","Sprout Badge: running dungeons with new or returning players."], links:[G.odyle]},
+  conquest:{what:"5-player Expedition dungeons. Conquest is the gear-farming mode: clear the dungeon and open its cube with Odyle Energy.",
+    where:["Expedition window","Pick a dungeon","Conquest"],
+    unlock:"Level 45+, with an item level requirement per dungeon.",
+    tips:["Reward charges: +1 every 8 h, banking up to 21.","Final-boss kills are capped at 35 a week."], links:[G.dung,G.checklist]},
+  transc:{what:"5-player stage-based dungeons and the main source of Arcana. A higher stage needs a higher item level.",
+    where:["Expedition window","Transcendence","Pick a stage"],
+    unlock:"Item level 1,600 or more in the Global client.",
+    tips:["Reward charges: +1 every 12 h, banking up to 14.","28 final-boss kills per week."],
+    more:["Transcendence Dungeon Challenge Ticket gives +1 reward charge."], links:[G.dung,G.checklist]},
+  shugo:{what:"Hourly mini-games. After each game you pick reward cards with Reward Keys and earn Centuryroot Tokens for the festival shop.",
+    where:["Main menu","Content","Shugo Festival"],
+    unlock:"Level 10 and the quest Visions in Smoke (Elyos) or Urgent Pursuit (Asmodian).",
+    tips:["Starts every hour at :00. Within the 3-minute countdown, click the timer next to the minimap and choose a game.","Keys are shared by every character on the server, so use them on one character.","You can play without keys, but you won't get the reward picks."],
+    more:["Festival shop (Centuryroot Tokens): Daevanion Crystals, Soul Crystals, Stigma Shards, cosmetics. Some limits are monthly."], links:[G.shugo]},
+  invasion:{what:"A 3-minute arena event, scored on damage and kills, with a big boss at the end. Top places pull more loot cards.",
+    where:["Timer icon by minimap","Pick the event"],
+    tips:["Every hour at :30.","1 key a day, banking up to 7. A key is only used when you flip cards in the Monster Cube.","You can't join while you're inside a Spacetime Rift."], links:[G.inv]},
+  ascension:{what:"A solo dungeon: clear three rooms, then fight the boss. Score and difficulty decide the rewards.",
+    where:["Main menu","Content","Ascension Trial"],
+    unlock:"Level 45. Difficulties by item level: Easy 1,000, Normal 1,500, Hard 2,000, Challenge 2,500, Insane 3,000, Hell 3,500, Doom 4,000.",
+    tips:["Only one trial is open each week: Nightmare Altar and Sanctum of Loathing alternate.","An entry is used when you go in, so be ready before you enter.","Rewards: Enhance Stones, Amplify Stone Fragments, Ascension Binding Chest, Growth Pet Chest."],
+    more:["Ascension Trial Challenge Ticket gives +1 entry (a Duty Mission reward)."], links:[G.asc]},
+  fissure:{what:"The \"daily\" dungeon. Despite the name, it's a weekly pool of 14 entries shared by every character on the server. Runs are score-based and give enhancement materials.",
+    where:["Unknown Fissure menu","Daeva Bio-Research Base"],
+    tips:["About 2 runs a day uses the full pool by Wednesday.","Alts use the same pool, so spend it on your main."],
+    more:["Unknown Fissure Challenge Ticket gives +1 entry."], links:[G.checklist,G.dung]},
+  exploration:{what:"The weekly reward mode of Expedition dungeons. Each dungeon has 7 reward counts per week.",
+    where:["Expedition window","Pick a dungeon","Exploration"],
+    tips:["Examples: Krao Cave, Urugugu Canyon, Draupnir.","Counts don't carry over. The weekly reset sets them back to 7."], links:[G.dung,G.checklist]},
+  raid:{what:"Large group raids. Each raid has its own weekly limit on boss kills.",
+    where:["Expedition window","Sanctuary"],
+    tips:["4 attempts per raid. Abyssal Forge: Ludra allows 1 final-boss kill per week; Corroded Decontamination Facility and Chalice of Muspel allow 2 each.","Cubes here also cost Odyle Energy."], links:[G.dung,G.checklist]},
+  subjugation:{what:"4-player dungeons that use weekly tickets.",
+    tips:["3 tickets a week, refilled to 3 on Wednesday, so unused ones are lost."], links:[G.checklist]},
+  abyss:{what:"Reshanta, the PvPvE zone, with Abyss Points, field bosses and rifts. It runs on a weekly time budget.",
+    where:["Abyss portal","Lower / Middle / Upper Reshanta"],
+    unlock:"Level 45, the Episode quest, and Gear Score 1,000.",
+    tips:["7 h per layer per week. The timer only runs while you're inside.","Spend Abyss Points in the Abyss Trade Shop before the reset. Potential Stone: Abyss costs 25,000 AP."], links:[G.checklist,G.reset]},
+  battlefield:{what:"Equalized PvP: your gear is normalized, so it's about skill. Wins count toward weekly rewards.",
+    tips:["Optional for PvE players, but the weekly rewards are worth it.","Win counts are per character, so it's good content for alts."], links:[G.checklist]},
+  shops:{what:"Vendors with weekly purchase limits. An unused limit is lost at the reset.",
+    where:["Command Merchant","Capital or Abyss"],
+    tips:["Duty Commands: buy the scrolls from the Command Merchant for Kina (up to 20 a week). You can finish the quests later, but the purchase limit resets.","Check the Abyss Trade Shop, the Nightmare shop and general vendors for Odyle Energy and enhancement items."], links:[G.reset]},
+  pass:{what:"The season pass. Pass EXP is capped per week, so top it up to the limit before Wednesday.",
+    tips:["Season 1 weekly limit: 50,000 pass EXP.","Rewards include Odyle Energy items."], links:[G.checklist]},
+  season:{what:"Season Mission points. Weekly rewards pay out based on your points at the reset, then the points start over.",
+    tips:["Season 1 runs until 16 Dec 2026."], links:[G.season,G.checklist]}
+};
+
+/* Entry requirements on the Global client. min = badge on the row, rows = detail list in the info panel */
+G.dlist = ["Dungeon list & item levels (metabot.gg)","https://metabot.gg/en/aion-2/guides/dungeon-guide"];
+G.ludra = ["Ludra raid return (timesaver.gg)","https://timesaver.gg/blog/aion-2-ludra-raid"];
+const REQ = {
+  duty:{min:"Lv 45", rows:[["Character level","45"],["Also needed","Episode quest + first Abyss visit"]]},
+  nightmare:{min:"Lv 45", rows:[["Character level","45 (attempts start at 45)"],["Item level","None published. Boss tiers get harder; pick the tier your gear can clear"]]},
+  conquest:{min:"iL 700", rows:[["Krao Cave","Lv 45 · iL 700"],["Draupnir","Lv 45 · iL 700"],["Urugugu Canyon","Lv 45 · iL 1,400"],["Vakron Sky Island","Lv 45 · iL 1,400"],["Fire Temple","Lv 45 · iL 2,100"],["Ferocious Horn Den","Lv 45 · iL 2,100"]], src:G.dlist},
+  transc:{min:"iL 1,600", rows:[["Stage ★1","iL 1,600 (Lv 45)"],["Stage ★2","iL 1,900"],["Stage ★3","iL 2,200"],["Stage ★4","iL 2,500"]], src:G.dlist},
+  shugo:{min:"Lv 10", rows:[["Character level","10 + intro quest"]]},
+  ascension:{min:"iL 1,000", rows:[["Easy","iL 1,000"],["Normal","iL 1,500"],["Hard","iL 2,000"],["Challenge","iL 2,500"],["Insane","iL 3,000"],["Hell","iL 3,500"],["Doom (some trials)","iL 4,000"],["Character level","45"]], src:G.dlist},
+  fissure:{min:"Lv 30", rows:[["Character level","30"],["Item level","No minimum listed"]], src:G.dlist},
+  exploration:{min:"iL 200", rows:[["Krao Cave","Lv 20 · iL 200"],["Urugugu Canyon","Lv 28 · iL 300"],["Fire Temple","Lv 35 · iL 500"],["Draupnir","Lv 45 · iL 700"],["Vakron Sky Island","Lv 45 · iL 1,400"],["Ferocious Horn Den","Lv 45 · iL 2,100"]], src:G.dlist},
+  raid:{min:"iL 2,800", rows:[["Abyssal Forge: Ludra · Normal","iL 2,800 (Lv 45)"],["Abyssal Forge: Ludra · Hard","iL 3,000"],["Status","Ludra returns on Global on Wed 4 Nov 2026"]], src:G.ludra},
+  subjugation:{min:"iL 1,000", rows:[["Easy","iL 1,000"],["Normal","iL 1,500"],["Hard","iL 2,000"],["Extreme","iL 2,500"],["Despair","iL 3,000"],["Hell","iL 3,500"],["Character level","45"]], src:G.dlist},
+  abyss:{min:"Lv 45", rows:[["Character level","45 + Episode quest"],["Gear Score","1,000"]]}
+};
+
+const DEF = () => ({v:1, checks:{}, rem:{}, hidden:[], maxOv:{}, custom:[], warn:{d:true,dh:2,w:true,wh:12}, sound:true, updatedAt:0});
+let S = DEF();
+const LS = "aion2-tracker-v1", LSF = "aion2-fired-v1";
+try { const r = localStorage.getItem(LS); if (r) S = Object.assign(DEF(), JSON.parse(r)); } catch(e){}
+let fired = {}; try { fired = JSON.parse(localStorage.getItem(LSF)||"{}"); } catch(e){}
+
+/* ---------- time ---------- */
+function dailyStart(now){ const d=new Date(now); let s=Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),7); if(s>now) s-=DAY; return s; }
+function weeklyStart(now){ let s=dailyStart(now); while(new Date(s).getUTCDay()!==3) s-=DAY; return s; }
+const cycleOf = (t,now) => t==="d" ? dailyStart(now) : weeklyStart(now);
+const pad = n => String(n).padStart(2,"0");
+function fmtLeft(ms, withDays){ const s=Math.max(0,Math.floor(ms/1000)); const d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), x=s%60; return (withDays&&d? d+"d ":"")+pad(withDays?h:h+d*24)+":"+pad(m)+":"+pad(x); }
+const localFmt = new Intl.DateTimeFormat(undefined,{weekday:"short",hour:"2-digit",minute:"2-digit"});
+const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+/* ---------- tasks ---------- */
+function tasks(){ return BASE.concat(S.custom).map(t => Object.assign({}, t, {max: S.maxOv[t.id] || t.max})); }
+function count(task, now=Date.now()){ const c=S.checks[task.id]; return c && c.cy===cycleOf(task.t,now) ? Math.min(c.n, task.max) : 0; }
+function setCount(task, n){ S.checks[task.id] = {cy: cycleOf(task.t, Date.now()), n: Math.max(0, Math.min(task.max, n))}; save(); render(); }
+const isDone = (t,now) => count(t,now) >= t.max;
+
+/* ---------- persistence ---------- */
+let docRef=null, saveTimer=null, writing=Promise.resolve();
+function save(){
+  S.updatedAt = Date.now();
+  try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){}
+  if (!docRef) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { const snap = JSON.parse(JSON.stringify(S)); writing = writing.then(() => docRef.set(snap)).catch(()=>{}); }, 700);
+}
+async function initSync(){
+  const note = document.getElementById("syncNote");
+  try {
+    if (!window.claude || !window.claude.use) { note.textContent = "Progress is saved in this browser."; return; }
+    const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    if (!db || !user) { note.textContent = "Progress is saved in this browser."; return; }
+    const id = await user.id();
+    if (!id) { note.textContent = "Progress is saved in this browser."; return; }
+    docRef = db.doc("data/users/" + id + "/state");
+    note.textContent = "Progress syncs across your devices.";
+    let first = true;
+    docRef.onSnapshot(snap => {
+      if (snap.hasPendingWrites) return;
+      const remote = snap.exists ? snap.data() : null;
+      if (remote && (remote.updatedAt||0) > (S.updatedAt||0)) {
+        S = Object.assign(DEF(), JSON.parse(JSON.stringify(remote)));
+        try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){}
+        render();
+      } else if (first && (!remote || (remote.updatedAt||0) < (S.updatedAt||0)) && S.updatedAt) {
+        save();
+      }
+      first = false;
+    }, () => { note.textContent = "Sync stopped; progress is saved in this browser."; docRef = null; });
+  } catch(e) { note.textContent = "Progress is saved in this browser."; }
+}
+
+/* ---------- render ---------- */
+let editing=false, openRem=null; const openInfo=new Set();
+const $ = id => document.getElementById(id);
+const CHECK = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const BELL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function rowHTML(t, now){
+  const n = count(t, now), done = n>=t.max, hid = S.hidden.includes(t.id), r = S.rem[t.id];
+  let ctrl = "";
+  if (t.max>1 && t.max<=7) {
+    ctrl = '<div class="counter" role="group" aria-label="'+esc(t.name)+' progress">' + Array.from({length:t.max},(_,i)=>'<button type="button" class="pip'+(i<n?' f':'')+'" data-act="pip" data-i="'+i+'" aria-label="Set to '+(i+1)+'"></button>').join("") + '</div>';
+  } else if (t.max>7) {
+    ctrl = '<div class="counter"><button type="button" class="step" data-act="dec" aria-label="One less">−</button><span class="num">'+n+'/'+t.max+'</span><button type="button" class="step" data-act="inc" aria-label="One more">+</button></div>';
+  } else ctrl = '<span></span>';
+  const remLbl = r && r.on ? (r.day!=null && r.day!=="" ? DAYS[r.day]+" " : "") + r.time : "";
+  let html = '<div class="row '+(t.t==="d"?"daily":"weekly")+(done?" done":"")+(hid?" hidden-row":"")+'" data-id="'+t.id+'">'
+    + '<button type="button" class="check" data-act="toggle" aria-pressed="'+done+'" aria-label="Mark '+esc(t.name)+' done">'+CHECK+'</button>'
+    + '<div class="info"><div class="name"><span class="nm">'+esc(t.name)+'</span>'
+      + (REQ[t.id]?' <span class="req" title="Minimum to enter">'+REQ[t.id].min+'</span>':'')
+      + (INFO[t.id]?' <button type="button" class="ib" data-act="info" aria-expanded="'+openInfo.has(t.id)+'" aria-label="About '+esc(t.name)+'">i</button>':'')
+      + '</div>'+(t.note?'<div class="note">'+esc(t.note)+(remLbl?' · 🔔 '+remLbl:'')+'</div>':(remLbl?'<div class="note">🔔 '+remLbl+'</div>':''))+'</div>'
+    + ctrl
+    + '<button type="button" class="bell'+(r&&r.on?' set':'')+'" data-act="bell" aria-label="Reminder for '+esc(t.name)+'" aria-expanded="'+(openRem===t.id)+'">'+BELL+'</button>';
+  if (openInfo.has(t.id) && INFO[t.id]) html += infoHTML(t);
+  if (openRem===t.id) {
+    const rr = r || {time: t.t==="d" ? "20:00" : "19:00", day: t.t==="w" ? 2 : "", on:false};
+    html += '<div class="rem"><label>Remind me at <input type="time" id="rt-'+t.id+'" value="'+rr.time+'"></label>'
+      + '<label>on <select id="rd-'+t.id+'"><option value="">every day</option>'+DAYS.map((d,i)=>'<option value="'+i+'"'+(String(rr.day)===String(i)?' selected':'')+'>'+d+'</option>').join("")+'</select></label>'
+      + '<button type="button" class="btn on" data-act="remSave">Save</button>'
+      + (r&&r.on?'<button type="button" class="btn" data-act="remOff">Turn off</button>':'')
+      + '<span class="note">Skipped if already done.</span></div>';
+  }
+  if (editing) {
+    html += '<div class="edit"><label><input type="checkbox" data-act="hide"'+(hid?'':' checked')+'> Show</label>'
+      + '<label>Times <input type="number" min="1" max="50" value="'+t.max+'" data-act="max"></label>'
+      + (t.custom?'<button type="button" class="btn danger" data-act="del">Delete</button>':'') + '</div>';
+  }
+  return html + '</div>';
+}
+
+function infoHTML(t){
+  const I = INFO[t.id], R = REQ[t.id];
+  const li = a => '<ul>'+a.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>';
+  let h = '<div class="infop"><p class="what">'+esc(I.what)+'</p>';
+  if (I.where) h += '<div class="blk"><span class="k">Where in game</span><div class="path">'+I.where.map(p=>'<span class="'+(p.length<=2?'key':'crumb')+'">'+esc(p)+'</span>').join('<span class="sep">›</span>')+'</div></div>';
+  if (R) h += '<div class="blk"><span class="k">Entry requirements</span><dl class="reqs">'+R.rows.map(r=>'<dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd>').join("")+'</dl></div>';
+  else if (I.unlock) h += '<div class="blk"><span class="k">Unlock</span><p>'+esc(I.unlock)+'</p></div>';
+  if (R && I.unlock) h += '<div class="blk"><span class="k">Unlock</span><p>'+esc(I.unlock)+'</p></div>';
+  if (I.tips) h += '<div class="blk"><span class="k">Good to know</span>'+li(I.tips)+'</div>';
+  if (I.more) h += '<div class="blk more"><span class="k">How to get more</span>'+li(I.more)+'</div>';
+  const links = (I.links||[]).concat(R&&R.src&&!(I.links||[]).includes(R.src)?[R.src]:[]);
+  if (links.length) h += '<div class="links">'+links.map(l=>'<a href="'+l[1]+'" target="_blank" rel="noopener">'+esc(l[0])+' ↗</a>').join("")+'</div>';
+  return h + '</div>';
+}
+
+function render(){
+  const now = Date.now();
+  const all = tasks();
+  ["d","w"].forEach(type => {
+    const list = all.filter(t => t.t===type && (editing || !S.hidden.includes(t.id)));
+    $(type==="d"?"rowsD":"rowsW").innerHTML = list.map(t => rowHTML(t, now)).join("");
+  });
+  updateCounts(now);
+  $("btnEdit").classList.toggle("on", editing);
+  $("editPanel").hidden = !editing;
+}
+function updateCounts(now){
+  const vis = tasks().filter(t => !S.hidden.includes(t.id));
+  const d = vis.filter(t=>t.t==="d"), w = vis.filter(t=>t.t==="w");
+  const dd = d.filter(t=>isDone(t,now)).length, wd = w.filter(t=>isDone(t,now)).length;
+  $("dCount").textContent = dd+"/"+d.length; $("wCount").textContent = wd+"/"+w.length;
+  $("dHead").textContent = dd+" of "+d.length+" done"; $("wHead").textContent = wd+" of "+w.length+" done";
+  $("dBar").style.width = (d.length? dd/d.length*100:0)+"%"; $("wBar").style.width = (w.length? wd/w.length*100:0)+"%";
+}
+
+function tick(){
+  const now = Date.now();
+  const dNext = dailyStart(now)+DAY, wNext = weeklyStart(now)+WEEK;
+  $("dT").textContent = fmtLeft(dNext-now,false);
+  $("wT").textContent = fmtLeft(wNext-now,true);
+  $("dSub").textContent = "Next: " + localFmt.format(dNext) + " your time";
+  $("wSub").textContent = "Next: " + localFmt.format(wNext) + " your time";
+  // rotation
+  const ws = weeklyStart(now);
+  if (ws < SEASON_END && ws >= SEASON_ANCHOR) {
+    const idx = Math.round((ws-SEASON_ANCHOR)/WEEK);
+    const cur = idx%2===0 ? "Sanctum of Loathing" : "Nightmare Altar", nxt = idx%2===0 ? "Nightmare Altar" : "Sanctum of Loathing";
+    $("rotation").innerHTML = "Ascension Trial this week: <b>"+cur+"</b> <span class='note'>· next week "+nxt+"</span>";
+    $("rotation").hidden = false;
+  } else $("rotation").hidden = true;
+  // a reset happened while open → re-render to clear checks
+  if (tick.lastD && tick.lastD !== dailyStart(now)) render();
+  tick.lastD = dailyStart(now);
+  checkReminders(now);
+}
+
+/* ---------- reminders ---------- */
+let audio=null;
+function chime(){
+  if (!S.sound) return;
+  try {
+    audio = audio || new (window.AudioContext||window.webkitAudioContext)();
+    [880,1320].forEach((f,i)=>{ const o=audio.createOscillator(), g=audio.createGain(); o.type="sine"; o.frequency.value=f; const t0=audio.currentTime+i*.18; g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(.18,t0+.02); g.gain.exponentialRampToValueAtTime(.001,t0+.6); o.connect(g).connect(audio.destination); o.start(t0); o.stop(t0+.65); });
+  } catch(e){}
+}
+document.addEventListener("pointerdown", () => { try { audio = audio || new (window.AudioContext||window.webkitAudioContext)(); if (audio.state==="suspended") audio.resume(); } catch(e){} }, {once:true});
+
+let titleFlash=null; const baseTitle=document.title;
+function notify(title, body){
+  const box = document.createElement("div"); box.className="toast";
+  box.innerHTML = "<div><b>"+esc(title)+"</b>"+esc(body)+"</div><button type='button' aria-label='Dismiss'>×</button>";
+  box.querySelector("button").onclick = () => box.remove();
+  $("toasts").appendChild(box);
+  setTimeout(()=>box.remove(), 5*60e3);
+  chime();
+  try { if ("Notification" in window && Notification.permission==="granted") new Notification(title,{body}); } catch(e){}
+  if (document.hidden && !titleFlash) { let on=false; titleFlash=setInterval(()=>{document.title=(on=!on)?"🔔 "+title:baseTitle;},1000); }
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden && titleFlash){ clearInterval(titleFlash); titleFlash=null; document.title=baseTitle; } });
+function markFired(k){ fired[k]=Date.now(); for (const key in fired) if (Date.now()-fired[key]>9*DAY) delete fired[key]; try{localStorage.setItem(LSF,JSON.stringify(fired));}catch(e){} }
+
+function checkReminders(now){
+  const d = new Date(now);
+  const all = tasks().filter(t=>!S.hidden.includes(t.id));
+  all.forEach(t => {
+    const r = S.rem[t.id]; if (!r || !r.on || !r.time) return;
+    if (r.day!=="" && r.day!=null && Number(r.day)!==d.getDay()) return;
+    const [hh,mm] = r.time.split(":").map(Number);
+    const target = new Date(d.getFullYear(), d.getMonth(), d.getDate(), hh, mm).getTime();
+    const key = "t:"+t.id+":"+target;
+    if (now>=target && now-target < 15*60e3 && !fired[key]) {
+      markFired(key);
+      if (!isDone(t,now)) notify(t.name, " · " + (t.max>1 ? count(t,now)+"/"+t.max+" done" : "not done yet"));
+    }
+  });
+  [["d",S.warn.d,S.warn.dh,dailyStart(now)+DAY,"Daily"],["w",S.warn.w,S.warn.wh,weeklyStart(now)+WEEK,"Weekly"]].forEach(([type,on,h,next,label]) => {
+    if (!on) return;
+    const left = next-now; const key="w:"+type+":"+next;
+    if (left>0 && left<=h*3600e3 && !fired[key]) {
+      markFired(key);
+      const open = all.filter(t=>t.t===type && !isDone(t,now));
+      if (open.length) notify(label+" reset in "+fmtLeft(left,type==="w").replace(/:\d\d$/,""), " · Still open: "+open.slice(0,4).map(t=>t.name).join(", ")+(open.length>4?" +"+(open.length-4)+" more":""));
+    }
+  });
+}
+
+/* ---------- events ---------- */
+function taskById(id){ return tasks().find(t=>t.id===id); }
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const row = b.closest(".row"); const t = row && taskById(row.dataset.id); const act = b.dataset.act;
+  if (!t) return;
+  if (act==="toggle") setCount(t, isDone(t,Date.now()) ? 0 : t.max);
+  else if (act==="pip") { const i=+b.dataset.i; setCount(t, count(t)===i+1 ? i : i+1); }
+  else if (act==="inc") setCount(t, count(t)+1);
+  else if (act==="dec") setCount(t, count(t)-1);
+  else if (act==="info") { openInfo.has(t.id) ? openInfo.delete(t.id) : openInfo.add(t.id); render(); }
+  else if (act==="bell") { openRem = openRem===t.id ? null : t.id; render(); }
+  else if (act==="remSave") { S.rem[t.id] = {time: $("rt-"+t.id).value || "20:00", day: $("rd-"+t.id).value, on:true}; openRem=null; save(); render(); toastSaved(t); }
+  else if (act==="remOff") { delete S.rem[t.id]; openRem=null; save(); render(); }
+  else if (act==="del") { S.custom = S.custom.filter(c=>c.id!==t.id); delete S.checks[t.id]; delete S.rem[t.id]; save(); render(); }
+});
+function toastSaved(t){ const r=S.rem[t.id]; const box=document.createElement("div"); box.className="toast"; box.innerHTML="<div><b>Reminder set</b>"+esc(t.name)+" · "+(r.day!==""?DAYS[r.day]+" ":"daily ")+r.time+"</div>"; $("toasts").appendChild(box); setTimeout(()=>box.remove(),3000); }
+document.addEventListener("change", e => {
+  const el = e.target; const row = el.closest && el.closest(".row");
+  if (row && el.dataset.act==="hide") { const id=row.dataset.id; S.hidden = el.checked ? S.hidden.filter(x=>x!==id) : S.hidden.concat(id); save(); render(); }
+  if (row && el.dataset.act==="max") { const v=Math.max(1,Math.min(50,parseInt(el.value)||1)); S.maxOv[row.dataset.id]=v; save(); render(); }
+});
+$("btnEdit").onclick = () => { editing=!editing; render(); };
+$("btnSettings").onclick = () => { const p=$("settings"); p.hidden=!p.hidden; $("btnSettings").classList.toggle("on",!p.hidden); };
+function bindSettings(){
+  $("wDaily").checked=S.warn.d; $("wDailyH").value=S.warn.dh; $("wWeekly").checked=S.warn.w; $("wWeeklyH").value=S.warn.wh; $("sound").checked=S.sound;
+}
+bindSettings();
+["wDaily","wDailyH","wWeekly","wWeeklyH","sound"].forEach(id => $(id).addEventListener("change", () => {
+  S.warn = {d:$("wDaily").checked, dh:Math.max(1,+$("wDailyH").value||2), w:$("wWeekly").checked, wh:Math.max(1,+$("wWeeklyH").value||12)}; S.sound=$("sound").checked; save();
+}));
+$("btnTest").onclick = () => notify("Nightmare bosses", " · 0/2 done (test)");
+$("btnNotif").onclick = async () => {
+  const st=$("notifState");
+  try {
+    if (!("Notification" in window)) throw 0;
+    const p = await Notification.requestPermission();
+    st.textContent = p==="granted" ? "Desktop notifications are on." : "Desktop notifications aren't available here, so reminders show inside the page.";
+  } catch(e){ st.textContent = "Desktop notifications aren't available here, so reminders show inside the page."; }
+};
+$("addForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const name=$("addName").value.trim(); if(!name) return;
+  S.custom.push({id:"c"+Date.now().toString(36), t:$("addType").value, name, max:Math.max(1,Math.min(50,+$("addMax").value||1)), note:"", custom:true});
+  $("addName").value=""; save(); render();
+});
+function askClear(){
+  $("resetBox").innerHTML = "<span>Uncheck all tasks for this cycle?</span><button class='btn danger' type='button' id='yes'>Yes, uncheck</button><button class='btn' type='button' id='no'>Cancel</button>";
+  $("yes").onclick = () => { S.checks={}; save(); render(); resetBtn(); };
+  $("no").onclick = resetBtn;
+}
+function resetBtn(){ $("resetBox").innerHTML = "<button class='btn danger' type='button' id='btnClear'>Uncheck everything</button>"; $("btnClear").onclick = askClear; }
+$("btnClear").onclick = askClear;
+
+render(); tick(); setInterval(tick, 1000);
+initSync();
+})();
+</script>
+</body>
+</html>
