@@ -136,6 +136,37 @@ section.list{display:flex;flex-direction:column;gap:8px}
 .toast button{background:transparent;border:0;color:inherit;opacity:.7;padding:0 2px;font-size:1.1rem}
 @keyframes in{from{transform:translateY(8px);opacity:.3}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.toast{animation:none}.bar i{transition:none}}
+.cheat{gap:10px}
+.rules{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px;font-size:.9rem}
+.rules .k,.infop .k{display:block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:600}
+.rules ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.dg{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.dg summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px}
+.dg summary::-webkit-details-marker{display:none}
+.dg summary::before{content:"›";color:var(--muted);font-size:1.2rem;line-height:1;transition:transform .15s;display:inline-block;width:10px}
+.dg[open] summary::before{transform:rotate(90deg)}
+.dn{font-family:var(--f-display);font-size:1.12rem}
+.boss{font-size:.84rem;color:var(--muted)}
+.mech{display:grid;grid-template-columns:minmax(120px,210px) 1fr;gap:8px 16px;margin:0;padding:0 16px 14px;font-size:.9rem}
+.mech dt{font-weight:600;color:var(--accent)}
+.mech dt.mid{color:var(--muted)}
+.mech dt.hard{color:var(--danger)}
+.mech dd{margin:0;min-width:0}
+@media (max-width:520px){.mech{grid-template-columns:1fr;gap:2px}.mech dd{margin-bottom:8px}}
+@media (prefers-reduced-motion:reduce){.dg summary::before{transition:none}}
+.grp{font-family:var(--f-body);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:8px 0 0;font-weight:600}
+.bosses{display:flex;flex-direction:column;gap:14px;padding:0 16px 16px;font-size:.9rem}
+.bb h4{margin:0 0 6px;font-size:.95rem;color:var(--accent);display:flex;align-items:center;gap:8px}
+.bb ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;max-width:70ch}
+.bb li.warn::marker{color:var(--danger)}
+.bb li.warn{color:var(--fg)}
+.fin{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;background:var(--gold-soft);color:var(--gold);padding:1px 6px;border-radius:5px;font-weight:700}
+.dbody{display:flex;flex-direction:column;gap:14px;padding:0 16px 16px;font-size:.9rem}
+.route .k{display:block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:600}
+.route ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:3px;max-width:70ch;color:var(--muted)}
+.route ol li::marker{font-family:var(--f-mono);font-size:.8rem;color:var(--accent)}
+.bb .mid{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;background:var(--sunk);color:var(--muted);padding:1px 6px;border-radius:5px;font-weight:700}
+.dbody .links a{color:var(--accent)}
 footer{font-size:.8rem;color:var(--muted)}
 footer a{color:var(--accent)}
 </style>
@@ -202,6 +233,233 @@ footer a{color:var(--accent)}
   <section class="list" id="listW">
     <div class="list-h"><h2>Weekly</h2><span id="wHead"></span></div>
     <div class="rows" id="rowsW"></div>
+  </section>
+
+  <section class="list cheat" id="cheatsheet">
+    <div class="list-h"><h2>Conquest bosses</h2><span>5 dungeons</span></div>
+    <div class="rules">
+      <span class="k">Before every boss</span>
+      <ul>
+        <li><b>Wait for the whole party before pulling.</b> Anyone outside the arena when the fight starts is locked out.</li>
+        <li><b>Save stagger for the checks.</b> High damage doesn't mean high stagger. Slot a Stagger Stigma (+50) if checks keep failing.</li>
+      </ul>
+    </div>
+
+    <details class="dg">
+      <summary><span class="dn">Krao Cave</span><span class="req">iL 700</span><span class="boss">Final: Ultimate Berk</span></summary>
+      <div class="dbody">
+        <div class="route"><span class="k">Route</span><ol>
+          <li>Left branch: Neglected Gadioton. Right branch: Enhanced Harcon. Both optional, but each kill improves the final cube.</li>
+          <li>Kill the Krao Seal Guardian to break the seal on Berk's cave.</li>
+          <li>Leave the red orbs alone; they chase you into the boss rooms.</li>
+          <li>Sealed Cave: Ultimate Berk.</li>
+        </ol></div>
+        <div class="bb"><h4>Ultimate Berk <span class="fin">final</span></h4><ul>
+          <li class="warn"><b>Wave of Fury (75% and ~25–33%):</b> he jumps to the center and stones rise. Get behind a stone before the 5 s cast ends. Barriers and Salvation don't save you. In the open means dead.</li>
+          <li class="warn"><b>50% stagger check:</b> 9 s to fill the gauge or the party wipes. Falling stones on orange markers stun for 1 s, so keep moving.</li>
+          <li>Red dust around him means Whirl: the targeted player kites along the outer edge, everyone else spreads away.</li>
+          <li>Slam into two swings: melee get behind him.</li>
+          <li>Enrage: a timer shows on his HP bar for the last 60 s. After that he's twice as fast and hits much harder.</li>
+          <li><b>Hard:</b> only one stone is real. The others crumble before the wave, so watch which one stays.</li>
+        </ul></div>
+        <div class="bb"><h4>Gadioton <span class="mid">mid-boss</span></h4><ul>
+          <li>At 35% he pulls everyone in, then stuns. Keep dodge stamina once he's under 50%.</li>
+        </ul></div>
+        <div class="bb"><h4>Harcon <span class="mid">mid-boss</span></h4><ul>
+          <li>Two crossing laser sets. The safe gaps move between the first and the second set, so reposition.</li>
+        </ul></div>
+        <div class="links"><a href="https://wikily.gg/aion-2/dungeon-maps/krao-cave" target="_blank" rel="noopener">Interactive map ↗</a></div>
+      </div>
+    </details>
+
+    <details class="dg">
+      <summary><span class="dn">Urugugu Canyon</span><span class="req">iL 1,400</span><span class="boss">Final: Divine Auldor</span></summary>
+      <div class="dbody">
+        <div class="route"><span class="k">Route</span><ol>
+          <li>Forest path to Guardian Captain Raur near the entrance.</li>
+          <li>Back out, then the short path to Judge Urahum.</li>
+          <li>Kill the Urugugu Wind Mage to start the wind stream, then glide up past the trees.</li>
+          <li>One player holds aggro while another taps the Kisk, then glide over the water to Auldor. Everyone enters before pulling.</li>
+        </ol></div>
+        <div class="bb"><h4>Raur</h4><ul>
+          <li class="warn"><b>"…Strike me!"</b> (around 70% and 30%): stop attacking and run far away. A delayed shockwave one-shots anyone in range.</li>
+          <li>He can pull up to four players in. Get out of the follow-up circle.</li>
+        </ul></div>
+        <div class="bb"><h4>Urahum</h4><ul>
+          <li>Slams leave pink pools that stay for the whole fight and stack up. Never stand in them; move after every slam.</li>
+          <li>For the multi-slam, the last hit is the heaviest. Run out of range instead of dodging inside it.</li>
+        </ul></div>
+        <div class="bb"><h4>Auldor <span class="fin">final</span></h4><ul>
+          <li class="warn"><b>He vanishes:</b> a marked player gets the landing. <b>Everyone stacks on that player</b>, or they die.</li>
+          <li>Tornadoes root you, which can stop you from stacking in time. Watch their paths while you move.</li>
+          <li>Avoid orange circles (dives) and the fissure his charge leaves behind.</li>
+          <li>At least two players must stay alive to finish the fight.</li>
+        </ul></div>
+        <div class="links"><a href="https://wikily.gg/aion-2/dungeon-maps/urugugu-canyon" target="_blank" rel="noopener">Interactive map ↗</a></div>
+      </div>
+    </details>
+
+    <details class="dg">
+      <summary><span class="dn">Draupnir</span><span class="req">iL 700</span><span class="boss">Final: Transcendent Bakarma</span></summary>
+      <div class="dbody">
+        <div class="route"><span class="k">Route</span><ol>
+          <li>Use the Abyss Entrance Control Device. A tank holds aggro while one player channels it.</li>
+          <li>Predator Saraswati and Phantasmal Lakshmi. Skippable in Conquest, required in Exploration.</li>
+          <li>Meditation Room: clear the Bakarma Brigade pack.</li>
+          <li>Blue portal into Bakarma's Subspace. Wait for the whole party.</li>
+        </ol></div>
+        <div class="bb"><h4>Transcendent Bakarma <span class="fin">final</span></h4><ul>
+          <li><b>75% and 25%:</b> the party gets teleported to the edge. Run to the boss and jump each wave slightly early. At 25%, also avoid the whirlpools.</li>
+          <li class="warn"><b>Stagger check in those phases:</b> a fail means a wipe and the boss back at 100%.</li>
+          <li>Between phases the floor turns into a red damage zone.</li>
+          <li>Frontal breath: the tank faces it away from the group.</li>
+          <li>Orange circles under players turn into geysers. Step out and spread.</li>
+        </ul></div>
+        <div class="bb"><h4>Lakshmi <span class="mid">mid-boss</span></h4><ul>
+          <li class="warn"><b>"Agony always comes back around!"</b> means 8 s of damage reflect. Stop DPS.</li>
+          <li>Kill the Handmaiden right away.</li>
+        </ul></div>
+        <div class="bb"><h4>Saraswati <span class="mid">mid-boss</span></h4><ul>
+          <li>Step out of blue pools. She can stand inside one, so pull her clear first.</li>
+          <li>Face the poison cone away from the party.</li>
+        </ul></div>
+        <div class="links"><a href="https://wikily.gg/aion-2/dungeon-maps/draupnir" target="_blank" rel="noopener">Interactive map ↗</a></div>
+      </div>
+    </details>
+
+    <details class="dg">
+      <summary><span class="dn">Fire Temple</span><span class="req">iL 2,100</span><span class="boss">Final: Kromede's Desire</span></summary>
+      <div class="dbody">
+        <div class="route"><span class="k">Route</span><ol>
+          <li>Path of Atonement.</li>
+          <li>Burning Temple: Silver Blade Rotan, then Red Spark Ignus. Black Smoke Murute is on the other branch.</li>
+          <li>After a mid-boss, glide through the Fire Corridor.</li>
+          <li>Mirror Altar: Kromede's Desire. The cube opens after her.</li>
+        </ol></div>
+        <div class="bb"><h4>Ignus <span class="mid">mid-boss</span></h4><ul>
+          <li><b>Green HP bar on you:</b> in ~3 s you drop a lava pool that stays for the whole fight. Go to the edge before it lands.</li>
+          <li>Floor marks, then he dashes from player to player. Spread so each takes one hit.</li>
+          <li>Later he jumps to the middle for a ring (donut) attack, then a chain of leaps. Spread out.</li>
+          <li>The coolant console on the route switches off the arena's burning hazards.</li>
+        </ul></div>
+        <div class="bb"><h4>Murute <span class="mid">mid-boss</span></h4><ul>
+          <li>Both arms raised: move. Circles appear under everyone and explode a moment later. Block or time a dodge.</li>
+          <li><b>Below 50%:</b> stomp waves grow outward twice. Block, perfect-dodge or back away.</li>
+        </ul></div>
+        <div class="bb"><h4>Kromede's Desire <span class="fin">final</span></h4><ul>
+          <li><b>She rises into the air (75% and 25%):</b> fire walls sweep the arena. Move through the gaps, wave after wave.</li>
+          <li><b>50%:</b> a clone appears next to each player and strikes twice. Spread out, then block or dodge.</li>
+          <li>At low HP her flame attack fires twice and projectiles cross the walls.</li>
+          <li class="warn"><b>Hard, late phase:</b> everyone is sent to the entrance. Reach the glowing circle in about 14 s or you die. Don't stop to fight clones.</li>
+        </ul></div>
+        <div class="links"><a href="https://wikily.gg/aion-2/dungeon-maps/fire-temple" target="_blank" rel="noopener">Interactive map ↗</a></div>
+      </div>
+    </details>
+
+    <details class="dg">
+      <summary><span class="dn">Ferocious Horn Den</span><span class="req">iL 2,100</span><span class="boss">Final: Ferocious Horn Nuakum</span></summary>
+      <div class="dbody">
+        <div class="route"><span class="k">Route</span><ol>
+          <li>Watchdog Kwapo.</li>
+          <li>Shining Mau Totem, the gate to the Altar Door.</li>
+          <li>Necromancer Duanka.</li>
+          <li>Howling Throne: Nuakum. The cube opens after him.</li>
+        </ol></div>
+        <div class="bb"><h4>Kwapo</h4><ul>
+          <li><b>75% and 25%:</b> he leaps and scatters orbs. Clear the orbs on one side (leftovers explode) and jump the expanding ring.</li>
+        </ul></div>
+        <div class="bb"><h4>Totem</h4><ul>
+          <li>Get the whole party inside before starting.</li>
+          <li>Grab grenades from the side platforms to clear the adds and break the barrier, then destroy the totem.</li>
+        </ul></div>
+        <div class="bb"><h4>Duanka</h4><ul>
+          <li><b>75%, 50%, 15%:</b> four tethered adds spawn. One player takes the white orb on the north side and kills them before they're absorbed.</li>
+          <li class="warn"><b>65% and 30%, Soul Caller:</b> run outside the big circle right away, avoiding the electric balls.</li>
+          <li>Black AoE that roots a player: others step in to share the damage.</li>
+        </ul></div>
+        <div class="bb"><h4>Nuakum <span class="fin">final</span></h4><ul>
+          <li>His hits stack bleed. At 3 stacks you drop a bleed pool, so drop it at the edge.</li>
+          <li>Small circle with inward arrows: <b>everyone stacks</b> on the marked player. Big circle with outward arrows: everyone else stays outside.</li>
+          <li><b>75% and 55%:</b> a marked player is rooted and a clone dashes at them. An unmarked player blocks the dash, and not the same player twice.</li>
+          <li><b>~30%:</b> the marked player lines up the central orb so his throws hit it.</li>
+          <li>Ground scratch: get behind him.</li>
+          <li class="warn">Conquest enrage at about 5 minutes.</li>
+        </ul></div>
+        <div class="links"><a href="https://wikily.gg/aion-2/dungeon-maps/ferocious-horn-den" target="_blank" rel="noopener">Interactive map ↗</a></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="list cheat" id="transcendence-bosses">
+    <div class="list-h"><h2>Transcendence bosses</h2><span>2 dungeons</span></div>
+
+    <details class="dg">
+      <summary><span class="dn">Deus Research Base</span><span class="req">iL 1,600</span><span class="boss">Final: Atiel</span></summary>
+      <div class="dbody">
+        <div class="route"><span class="k">Route</span><ol>
+          <li>Guard Troopers Captain Gelcos.</li>
+          <li>Lab Director Nazmun.</li>
+          <li>Glide down to the platform: Divine Test Subject Atiel.</li>
+        </ol></div>
+        <div class="bb"><h4>Gelcos</h4><ul>
+          <li>The opening whips are the best stagger window. A greyed-out gauge means he's immune and a charge is coming.</li>
+          <li>He charges the farthest player and leaves an electric field. Drag it to the edge, away from the group. The second dash hits the same player; then dodge the jump.</li>
+          <li>Pull him into a corner so the whip and charge cover less floor.</li>
+          <li>Nine-line slam: step out of the lines, then straight back in for the second slam.</li>
+          <li>Dark zone: step out. The real radius is smaller than it looks.</li>
+          <li>Vortex: move far away, avoiding the electric fields. Don't stand in front of him.</li>
+        </ul></div>
+        <div class="bb"><h4>Nazmun</h4><ul>
+          <li>The tank pulls him to the far end or a corner.</li>
+          <li>Rotating lasers: jump them. They come in series, so the first beam isn't the last.</li>
+          <li>White ring on a player: it explodes after ~3 s. That player moves away. Several marks means everyone spreads.</li>
+          <li class="warn">Don't pull him onto the stone floor at the glide-off point, or the fight resets.</li>
+        </ul></div>
+        <div class="bb"><h4>Atiel <span class="fin">final</span></h4><ul>
+          <li>Gather the whole party on the platform before pulling.</li>
+          <li><b>Tether:</b> two linked players run apart, while everyone else <b>stacks on the third, marked player</b> to share the heavy hit.</li>
+          <li>Grab and smash on one player is a one-shot. Sidestep it.</li>
+          <li>The arena edge falls away and his aura pushes outward. Move toward him and stay off the edge. Blue orbs also shove people off.</li>
+          <li>His chain hits players standing close together, so keep some space.</li>
+          <li class="warn"><b>Morphic World at 30%:</b> 10 s to stagger him or the party wipes. Save guard breaks for this.</li>
+        </ul></div>
+        <div class="links"><a href="https://wikily.gg/aion-2/dungeon-maps/deus-research-base" target="_blank" rel="noopener">Interactive map ↗</a></div>
+      </div>
+    </details>
+
+    <details class="dg">
+      <summary><span class="dn">Shattered Arkanis</span><span class="req">iL 1,600</span><span class="boss">Final: Talisra of the Void</span></summary>
+      <div class="dbody">
+        <div class="route"><span class="k">Route</span><ol>
+          <li>Siliator of Deceit.</li>
+          <li>Ruthilis of Pain.</li>
+          <li>Talisra of the Void.</li>
+        </ol></div>
+        <div class="bb"><h4>Siliator of Deceit</h4><ul>
+          <li>Don't clump up (bouncing blade).</li>
+          <li><b>From 75%:</b> two players get red lines. They cross paths in an X so the chakrams collide and shatter. Everyone else stays clear.</li>
+          <li><b>From 60%:</b> chakrams return along their lines. Don't cross several at once, and keep a dodge ready.</li>
+          <li>Big red circle: carry it away from the party.</li>
+          <li>Melee stay behind him (frontal and donut).</li>
+        </ul></div>
+        <div class="bb"><h4>Ruthilis of Pain</h4><ul>
+          <li class="warn">The opening AoE toward the entrance can kill. Don't come in through the middle.</li>
+          <li>Quadrant cleaves leave lightning puddles that kill on contact. Rotate clockwise to the next safe quadrant, never through old puddles.</li>
+          <li>From 95%: a donut jump on the farthest player. Red arena or big donut: get under the boss.</li>
+          <li>Ring after the lightning: jump it. Don't regroup until your own explosion resolves.</li>
+          <li><b>From 50%:</b> guillotine lines that bleed and knock down. Spread out.</li>
+        </ul></div>
+        <div class="bb"><h4>Talisra of the Void <span class="fin">final</span></h4><ul>
+          <li><b>75% and 30%:</b> colored droplets appear. Pick up your assigned color (purple or white; the wrong one stuns) and drop the matching dome near the boss.</li>
+          <li>When she flashes a color sequence, stand in the matching domes in that order.</li>
+          <li class="warn"><b>50%, 4 spears:</b> destroy the single white spear in front of her before the cast ends, or a lethal explosion hits.</li>
+          <li><b>50%, Diamond Jail:</b> shoot the crystal to free the trapped player.</li>
+          <li>Tracking beam: the target keeps moving, away from others.</li>
+          <li>Don't stand in the cone, and jump the ring waves.</li>
+        </ul></div>
+        <div class="links"><a href="https://wikily.gg/aion-2/dungeon-maps/shattered-arkanis" target="_blank" rel="noopener">Interactive map ↗</a></div>
+      </div>
+    </details>
   </section>
 
   <footer>Resets: daily 07:00 UTC, weekly Wednesday 07:00 UTC (server 16:00). Checks clear themselves at each reset. Info and item levels come from community guides for the Global client; menu names can differ slightly in game. <span id="syncNote"></span></footer>
@@ -436,7 +694,9 @@ function infoHTML(t){
   if (I.tips) h += '<div class="blk"><span class="k">Good to know</span>'+li(I.tips)+'</div>';
   if (I.more) h += '<div class="blk more"><span class="k">How to get more</span>'+li(I.more)+'</div>';
   const links = (I.links||[]).concat(R&&R.src&&!(I.links||[]).includes(R.src)?[R.src]:[]);
-  if (links.length) h += '<div class="links">'+links.map(l=>'<a href="'+l[1]+'" target="_blank" rel="noopener">'+esc(l[0])+' ↗</a>').join("")+'</div>';
+  if (t.id==="conquest"||t.id==="exploration") links.unshift(["Conquest bosses ↓","#cheatsheet",1]);
+  if (t.id==="transc") links.unshift(["Transcendence bosses ↓","#transcendence-bosses",1]);
+  if (links.length) h += '<div class="links">'+links.map(l=>l[2]?'<a href="'+l[1]+'">'+esc(l[0])+'</a>':'<a href="'+l[1]+'" target="_blank" rel="noopener">'+esc(l[0])+' ↗</a>').join("")+'</div>';
   return h + '</div>';
 }
 
