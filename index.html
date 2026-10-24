@@ -167,6 +167,37 @@ section.list{display:flex;flex-direction:column;gap:8px}
 .route ol li::marker{font-family:var(--f-mono);font-size:.8rem;color:var(--accent)}
 .bb .mid{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;background:var(--sunk);color:var(--muted);padding:1px 6px;border-radius:5px;font-weight:700}
 .dbody .links a{color:var(--accent)}
+.jump{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.86rem}
+.jump a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:1px}
+.jump a:hover{color:var(--fg);border-color:var(--accent)}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+section.list{scroll-margin-top:12px}
+.ilv{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px}
+.ilv label{font-weight:600}
+.ilv input{width:110px;font-family:var(--f-mono);font-size:1rem;background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
+.stages{display:flex;flex-direction:column;gap:6px}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.stage summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 16px}
+.stage summary::-webkit-details-marker{display:none}
+.stage summary::before{content:"›";color:var(--muted);font-size:1.2rem;line-height:1;display:inline-block;width:10px;transition:transform .15s}
+.stage[open] summary::before{transform:rotate(90deg)}
+.sr{font-family:var(--f-mono);font-weight:600;font-size:.88rem;font-variant-numeric:tabular-nums;color:var(--gold);min-width:104px}
+.st{font-family:var(--f-display);font-size:1.08rem}
+.you{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;background:var(--accent);color:var(--surface);padding:2px 8px;border-radius:5px}
+.donechip{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.stage.now{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.stage.past{opacity:.6}
+.sbody{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;padding:0 16px 14px;font-size:.9rem}
+.sbody>div{min-width:0}
+.sbody ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.sbody .k,.cp .k{display:block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:600}
+.swarn{grid-column:1/-1;margin:0;padding-left:12px;border-left:3px solid var(--danger)}
+.sunl{grid-column:1/-1;margin:0}
+.sunl .k{display:inline;margin-right:8px}
+@media (max-width:560px){.sbody{grid-template-columns:1fr}}
+.cp ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:4px}
+.hint a{color:var(--accent)}
 footer{font-size:.8rem;color:var(--muted)}
 footer a{color:var(--accent)}
 </style>
@@ -195,6 +226,10 @@ footer a{color:var(--accent)}
       <div class="sub" id="wSub">Wednesday 07:00 UTC</div>
     </div>
   </div>
+
+  <nav class="jump" aria-label="Sections">
+    <a href="#listD">Daily</a><a href="#listW">Weekly</a><a href="#gear-route">Gear route</a><a href="#cheatsheet">Conquest bosses</a><a href="#transcendence-bosses">Transcendence bosses</a>
+  </nav>
 
   <div class="rotation" id="rotation"></div>
 
@@ -233,6 +268,34 @@ footer a{color:var(--accent)}
   <section class="list" id="listW">
     <div class="list-h"><h2>Weekly</h2><span id="wHead"></span></div>
     <div class="rows" id="rowsW"></div>
+  </section>
+
+  <section class="list" id="gear-route">
+    <div class="list-h"><h2>Gear route</h2><span>Fresh 45 → 3,000 iL</span></div>
+    <div class="ilv">
+      <label for="myIlvl">My item level</label>
+      <input type="number" id="myIlvl" min="0" max="5000" step="10" inputmode="numeric" placeholder="e.g. 1850">
+      <span class="note" id="ilvlNote">Enter it to highlight your current stage.</span>
+    </div>
+    <div class="stages" id="stages"></div>
+    <div class="rules cp">
+      <span class="k">Combat Power, in order of value</span>
+      <ol>
+        <li>Replace your lowest item level slot first. Item level is the biggest driver of CP.</li>
+        <li>Enhance Epic and Unique gear to +10. Weapons, armor and accessories can't fail up to +10. <b>Clash Runes are different:</b> only +1 is safe.</li>
+        <li>Fill all Arcana slots, then upgrade card grades.</li>
+        <li>Spend every Daevanion Crystal and open more Daevanion nodes.</li>
+        <li>Stigma: spend Abyss Points on Stigma Shards until your main Stigmas reach level 20.</li>
+        <li>Pet Genus: Insight 10 on all five boards gives the Unbound by Genus title (+4.5% PvE damage).</li>
+        <li>Collect titles and wings. Owned ones add stats permanently.</li>
+        <li>Amplified Enhancement last. It matters mostly at very high CP.</li>
+      </ol>
+    </div>
+    <p class="hint">Global thresholds from community guides (Oct 2026). Conquest tiers open at 700, 1,400 and 2,100; Transcendence stages at 1,600, 1,900, 2,200 and 2,500. Korean guides list higher numbers, so ignore those.
+      <a href="https://raidrelay.com/aion-2-gear-score-guide" target="_blank" rel="noopener">Raid Relay ↗</a> ·
+      <a href="https://odealo.com/articles/progression-from-fresh-45-to-2800-aion-2-guide" target="_blank" rel="noopener">Odealo ↗</a> ·
+      <a href="https://corpus.gg/blog/aion-2/gear-score-guide" target="_blank" rel="noopener">Corpus ↗</a> ·
+      <a href="https://timesaver.gg/blog/aion-2-hard-mode-expedition-guide" target="_blank" rel="noopener">Hard mode ↗</a></p>
   </section>
 
   <section class="list cheat" id="cheatsheet">
@@ -586,7 +649,7 @@ const REQ = {
   abyss:{min:"Lv 45", rows:[["Character level","45 + Episode quest"],["Gear Score","1,000"]]}
 };
 
-const DEF = () => ({v:1, checks:{}, rem:{}, hidden:[], maxOv:{}, custom:[], warn:{d:true,dh:2,w:true,wh:12}, sound:true, updatedAt:0});
+const DEF = () => ({v:1, checks:{}, rem:{}, hidden:[], maxOv:{}, custom:[], warn:{d:true,dh:2,w:true,wh:12}, sound:true, ilvl:"", updatedAt:0});
 let S = DEF();
 const LS = "aion2-tracker-v1", LSF = "aion2-fired-v1";
 try { const r = localStorage.getItem(LS); if (r) S = Object.assign(DEF(), JSON.parse(r)); } catch(e){}
@@ -634,6 +697,8 @@ async function initSync(){
         S = Object.assign(DEF(), JSON.parse(JSON.stringify(remote)));
         try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){}
         render();
+        if (document.activeElement!==$("myIlvl")) $("myIlvl").value = S.ilvl || "";
+        renderStages(); bindSettings();
       } else if (first && (!remote || (remote.updatedAt||0) < (S.updatedAt||0)) && S.updatedAt) {
         save();
       }
@@ -791,6 +856,62 @@ function checkReminders(now){
   });
 }
 
+/* ---------- gear route ---------- */
+const STAGES = [
+  {from:0,to:1000,title:"Fresh 45",
+   run:["Main story to level 45 for the Spiritforged Weapon","Your faction's district quests and sealed dungeons in your home region","Krao Cave and Draupnir"],
+   up:["Spiritforged Weapon to +10","Two Clash Runes (40 iL each), both to +1 and stop there","Belt and Amulet from Rare to Epic with Substance Morph","Spend every Daevanion Crystal (+1 iL each)","Other quest gear only to +5"],
+   warn:"Clash Runes: only +1 is guaranteed. From +2 a failed attempt destroys the rune (+2 80%, +3 66%, +4 50%, +5 33%, down to 10% for +10). Sealed dungeons in the enemy faction's region don't give the same Daevanion rewards.",
+   unlock:"1,000: the Abyss and Ascension Trial Easy"},
+  {from:1000,to:1400,title:"Abyss opens",
+   run:["Abyss (Lower Reshanta)","All remaining regional quests and sealed dungeons","Stronghold scrolls"],
+   up:["Claim the Spiritforged Guard and take it to +10","Quest armor set to +5","Belt and Amulet to Unique; bracelets to +10","Manastones in weapon, guard and armor; Soulstones in accessories","Abyss Monolith feathers; Daevanion Crystals from the Nightmare and Shugo shops"],
+   warn:"Save Odyle Energy. Spending it on Draupnir before 1,400 is the most common waste.",
+   unlock:"1,400: Vakron Sky Island and Urugugu Canyon Conquest"},
+  {from:1400,to:1600,title:"First real gear",
+   run:["Vakron Sky Island for iL 70 armor and the Guard path","Urugugu Canyon Conquest for the iL 70 weapon and accessories"],
+   up:["Spend saved Odyle here, on your weakest slots","Vakron Exploration: armor choice after 3 claims","Urugugu Conquest: accessory pick after 21 claims","iL 70 gear to +5, key pieces to +10"],
+   unlock:"1,600: Transcendence stage 1"},
+  {from:1600,to:1900,title:"Arcana",
+   run:["Transcendence ★1: Deus Research Base and Shattered Arkanis"],
+   up:["Fill all five Arcana slots (Common +20, Rare +40)","Craft a Chalice with Transmute using Mysterious Crystals from Ascension Trial","Prefer lines that push your main skills toward level 16"],
+   warn:"Don't farm ★1 for better cards. Once the slots are full, go back to iL 70 gear.",
+   unlock:"1,900: Transcendence stage 2"},
+  {from:1900,to:2100,title:"Epic Arcana",
+   run:["Transcendence ★2 for Epic cards (+60)","Vakron and Urugugu for missing iL 70 pieces"],
+   up:["Level Arcana cards","Improve Bracelets, Belt and Amulet","Spend new Daevanion Crystals"],
+   warn:"+12 on Vakron gear is expensive for +2 iL. Usually skip it.",
+   unlock:"2,100: Fire Temple and Ferocious Horn Den Conquest"},
+  {from:2100,to:2500,title:"iL 86 gear",
+   run:["Ferocious Horn Den: Nuakum armor and Guard (iL 86); armor choice after 3 Exploration claims","Fire Temple Conquest: weapon and accessories; pick after 28 claims","Transcendence ★3 at 2,200 for Unique cards (+80), optional"],
+   up:["Each iL 86 replacement is about +16 iL","Prefer Horn Den armor picks over the Guard","Decide early: Enraged Kromede weapon (3 Soul Binding lines) or a crafted one (5 lines)","iL 86 gear to +10, sockets filled"],
+   warn:"Check all five Arcana cards before spending big on gear. Replacing old Rare cards is a large gain.",
+   unlock:"2,500: Transcendence stage 4 and the highest Ascension Trial tier"},
+  {from:2500,to:2800,title:"Unique Arcana",
+   run:["Transcendence ★4 for Unique cards, including the Unique Chalice","Hard Krao Cave and Hard Draupnir from 2,600 (4-min enrage, 3 revives each)"],
+   up:["Arcana cards to +5","Re-engrave sockets to yellow lines (+4 each vs +1 for gray)","Long-term iL 86 gear to +15; about 11.9M Kina per piece from +10 to +15","Hard mode: Ariel Fragments, 100 make one Ariel Daevanion Crystal"],
+   warn:"Don't take every dungeon piece past +15. Save that for crafted gear.",
+   unlock:"2,800: Abyssal Forge: Ludra raid (back on Global 4 Nov)"},
+  {from:2800,to:3000,title:"Crafted endgame",
+   run:["Abyssal Forge: Ludra raid (Normal 2,800, Hard 3,000)","Hard Conquest every week for Ariel Fragments and Unique crafting materials","Transcendence ★4"],
+   up:["Craft Dragon Lord weapon and accessories (iL 94, later 102); they're the pieces worth +15 and beyond","Past +15 you need Amplify Stones (Substance Morph: Amplify Stone Fragment + Enhance Stone)","Ariel Daevanion Crystals: up to 30 per character","Polish Manastone lines on long-term pieces"],
+   unlock:"3,000: Ludra Hard"}
+];
+function renderStages(){
+  const v = parseInt(S.ilvl,10);
+  const cur = isNaN(v) ? -1 : STAGES.findIndex(st => v>=st.from && v<st.to);
+  const li = a => '<ul>'+a.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>';
+  $("stages").innerHTML = STAGES.map((st,i) => {
+    const state = cur<0 ? "" : i<cur ? " past" : i===cur ? " now" : "";
+    return '<details class="stage'+state+'"'+(i===cur?' open':'')+'><summary><span class="sr">'+st.from.toLocaleString("en-US")+'–'+st.to.toLocaleString("en-US")+'</span><span class="st">'+esc(st.title)+'</span>'+(i===cur?'<span class="you">You are here</span>':'')+(i<cur&&cur>=0?'<span class="donechip">Done</span>':'')+'</summary>'
+      + '<div class="sbody"><div><span class="k">Run</span>'+li(st.run)+'</div><div><span class="k">Upgrade</span>'+li(st.up)+'</div>'
+      + (st.warn?'<p class="swarn">'+esc(st.warn)+'</p>':'')
+      + '<p class="sunl"><span class="k">Next unlock</span>'+esc(st.unlock)+'</p></div></details>';
+  }).join("");
+  if (cur>=0) $("ilvlNote").textContent = "Next goal: "+STAGES[cur].to.toLocaleString("en-US")+" iL ("+(STAGES[cur].to-v).toLocaleString("en-US")+" to go).";
+  else if (!isNaN(v) && v>=3000) $("ilvlNote").textContent = "Past 3,000. Ludra Hard is open.";
+  else $("ilvlNote").textContent = "Enter it to highlight your current stage.";
+}
 /* ---------- events ---------- */
 function taskById(id){ return tasks().find(t=>t.id===id); }
 document.addEventListener("click", e => {
@@ -845,6 +966,10 @@ function askClear(){
 function resetBtn(){ $("resetBox").innerHTML = "<button class='btn danger' type='button' id='btnClear'>Uncheck everything</button>"; $("btnClear").onclick = askClear; }
 $("btnClear").onclick = askClear;
 
+$("myIlvl").value = S.ilvl || "";
+let ilvlTimer=null;
+$("myIlvl").addEventListener("input", () => { clearTimeout(ilvlTimer); ilvlTimer=setTimeout(()=>{ S.ilvl = $("myIlvl").value; save(); renderStages(); }, 500); });
+renderStages();
 render(); tick(); setInterval(tick, 1000);
 initSync();
 })();
